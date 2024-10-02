@@ -11,7 +11,6 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./interfaces/IDepositExecute.sol";
 import "./interfaces/IBridge.sol";
 import "./interfaces/IERCHandler.sol";
-import "./interfaces/IGenericHandler.sol";
 import "./interfaces/IWETH.sol"; 
 /**
     @title Facilitates deposits, creation and votiing of deposit proposals, and deposit executions.
@@ -217,26 +216,7 @@ contract Bridge is Pausable, AccessControl {
         handler.setResource(resourceID, tokenAddress);
     }
 
-    /**
-        @notice Sets a new resource for handler contracts that use the IGenericHandler interface,
-        and maps the {handlerAddress} to {resourceID} in {_resourceIDToHandlerAddress}.
-        @notice Only callable by an address that currently has the admin role.
-        @param handlerAddress Address of handler resource will be set for.
-        @param resourceID ResourceID to be used when making deposits.
-        @param contractAddress Address of contract to be called when a deposit is made and a deposited is executed.
-     */
-    function adminSetGenericResource(
-        address handlerAddress,
-        bytes32 resourceID,
-        address contractAddress,
-        bytes4 depositFunctionSig,
-        bytes4 executeFunctionSig
-    ) external onlyAdmin {
-        _resourceIDToHandlerAddress[resourceID] = handlerAddress;
-        IGenericHandler handler = IGenericHandler(handlerAddress);
-        handler.setResource(resourceID, contractAddress, depositFunctionSig, executeFunctionSig);
-    }
-
+   
     /**
         @notice Sets a resource as burnable for handler contracts that use the IERCHandler interface.
         @notice Only callable by an address that currently has the admin role.
