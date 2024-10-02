@@ -26,6 +26,8 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
     // depositNonce => Deposit Record
     mapping (uint8 => mapping(uint64 => DepositRecord)) public _depositRecords;
 
+    event TransferAttempt(address indexed recipientAddress, uint256 amount);
+
     /**
         @param bridgeAddress Contract address of previously deployed Bridge.
         @param initialResourceIDs Resource IDs are used to identify a specific contract address.
@@ -180,19 +182,26 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
         if (_burnList[tokenAddress]) {
             mintERC20(tokenAddress, address(recipientAddress), amount);
         } else {
-            if (resourceID == 0x0000000000000000000000000000000000000000000000000000000000000000 || resourceID == 0x0000000000000000000000000000000000000000000000000000000000000002) {
+            if (resourceID == 0x0000000000000000000000000000000000000000000000000000000000000000 || 
+                resourceID == 0x0000000000000000000000000000000000000000000000000000000000000002) {
                 uint256 chainId;
                 assembly {
                     chainId := chainid()
                 }
                
-                if(chainId != 16688 && resourceID == 0x0000000000000000000000000000000000000000000000000000000000000002){
+                if(chainId != 6678 && resourceID == 0x0000000000000000000000000000000000000000000000000000000000000002){
                     releaseERC20(tokenAddress, address(recipientAddress), amount);
                 } else{
+                   // Call withdraw function from WEMC to EMC
                     (bool withdrawSuccess, ) = tokenAddress.call(abi.encodeWithSignature("withdraw(uint256)", amount));
-                    require(withdrawSuccess, "WETH withdraw to ETH failed");
+                    require(withdrawSuccess, "WEMC withdraw to EMC failed");
+
+                    // Transfer EMC to recipient
                     (bool success, ) = address(recipientAddress).call{value: amount}("");
-                    require(success, "ETH transfer failed");
+                    require(success, "EMC transfer failed");
+
+                    // Emit transfer attempt log
+                    emit TransferAttempt(address(recipientAddress), amount);
                 }
 
                

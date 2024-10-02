@@ -279,16 +279,16 @@ contract Bridge is Pausable, AccessControl {
         @param handlerAddress Address of handler to withdraw from.
         @param tokenAddress Address of token to withdraw.
         @param recipient Address to withdraw tokens to.
-        @param amountOrTokenID Either the amount of ERC20 tokens or the ERC721 token ID to withdraw.
+        @param amount Either the amount of ERC20 tokens to withdraw.
      */
     function adminWithdraw(
         address handlerAddress,
         address tokenAddress,
         address recipient,
-        uint256 amountOrTokenID
+        uint256 amount
     ) external onlyAdmin {
         IERCHandler handler = IERCHandler(handlerAddress);
-        handler.withdraw(tokenAddress, recipient, amountOrTokenID);
+        handler.withdraw(tokenAddress, recipient, amount);
     }
 
     receive() external payable {}

@@ -58,9 +58,9 @@ contract HandlerHelpers is IERCHandler {
         @notice Used to manually release funds from ERC safes.
         @param tokenAddress Address of token contract to release.
         @param recipient Address to release tokens to.
-        @param amountOrTokenID Either the amount of ERC20 tokens or the ERC721 token ID to release.
+        @param amount Either the amount of ERC20 tokens to release.
      */
-    function withdraw(address tokenAddress, address recipient, uint256 amountOrTokenID) external virtual override {}
+    function withdraw(address tokenAddress, address recipient, uint256 amount) external virtual override {}
 
     function _setResource(bytes32 resourceID, address contractAddress) internal {
         _resourceIDToTokenContractAddress[resourceID] = contractAddress;

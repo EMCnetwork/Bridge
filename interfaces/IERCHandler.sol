@@ -1,7 +1,7 @@
 pragma solidity 0.6.4;
 
 /**
-    @title Interface to be used with handlers that support ERC20s and ERC721s.
+    @title Interface to be used with handlers that support ERC20s.
     @author ChainSafe Systems.
  */
 interface IERCHandler {
@@ -20,7 +20,7 @@ interface IERCHandler {
         @notice Used to manually release funds from ERC safes.
         @param tokenAddress Address of token contract to release.
         @param recipient Address to release tokens to.
-        @param amountOrTokenID Either the amount of ERC20 tokens or the ERC721 token ID to release.
+        @param amount Either the amount of ERC20 tokens to release.
      */
-    function withdraw(address tokenAddress, address recipient, uint256 amountOrTokenID) external;
+    function withdraw(address tokenAddress, address recipient, uint256 amount) external;
 }
