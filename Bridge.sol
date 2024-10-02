@@ -292,7 +292,7 @@ contract Bridge is Pausable, AccessControl {
             chainId := chainid()
         }
         bytes32 RESOURCE;
-        if (chainId == 99876 || chainId == 84532) {
+        if (chainId == 6678 ) {
             RESOURCE = 0x0000000000000000000000000000000000000000000000000000000000000002;
         } else {
             RESOURCE = 0x0000000000000000000000000000000000000000000000000000000000000000;
@@ -308,7 +308,7 @@ contract Bridge is Pausable, AccessControl {
         bytes memory data,
         address sender
         
-    ) internal {
+    ) internal whenNotPaused {
         uint256 chainId;
         assembly {
             chainId := chainid()
@@ -349,7 +349,7 @@ contract Bridge is Pausable, AccessControl {
             chainId := chainid()
         }
        
-        if (chainId != 99876 ){
+        if (chainId != 6678 ){
             require(destinationChainID == 2, "destinationChainID supplied");
 
         } 
@@ -388,10 +388,11 @@ contract Bridge is Pausable, AccessControl {
         Proposal storage proposal = _proposals[nonceAndID][dataHash];
 
         require(_resourceIDToHandlerAddress[resourceID] != address(0), "no handler for resourceID");
-        require(uint(proposal._status) <= 1, "proposal already passed/executed/cancelled");
+        // require(uint(proposal._status) <= 1, "proposal already passed/executed/cancelled");
+        require(proposal._status == ProposalStatus.Inactive || proposal._status == ProposalStatus.Active,"proposal already passed/executed/cancelled")
         require(!_hasVotedOnProposal[nonceAndID][dataHash][msg.sender], "relayer already voted");
 
-        if (uint(proposal._status) == 0) {
+        if (proposal._status == ProposalStatus.Inactive) {
             ++_totalProposals;
             _proposals[nonceAndID][dataHash] = Proposal({
                 _resourceID : resourceID,
