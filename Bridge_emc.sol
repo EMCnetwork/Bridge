@@ -287,67 +287,7 @@ contract Bridge is Pausable, AccessControl {
         handler.withdraw(tokenAddress, recipient, amount);
     }
 
-    // receive() external payable {}
-
-    // fallback() external payable {
-    //     require(msg.data.length == 1, "Invalid data length");
-    //     uint8 destinationChainID = uint8(msg.data[0]);
-    //     require(msg.value >= _fee, "Incorrect fee supplied");
-
-    //     uint256 emcAmount = msg.value.sub(_fee);
-    //     IWEMC(WEMC_ADDRESS).deposit{value: emcAmount}();
-    //     IERC20(WEMC_ADDRESS).safeApprove(erc20HandlerAddress, emcAmount);
-    //     bytes memory data = abi.encodePacked(
-    //         bytes32(emcAmount), // Deposit Amount
-    //         bytes32(uint256(20)), // len(recipientAddress)
-    //         abi.encodePacked(msg.sender) // recipientAddress
-    //     );
-
-    //     uint256 chainId;
-    //     assembly {
-    //         chainId := chainid()
-    //     }
-    //     bytes32 RESOURCE;
-    //     if (chainId == 6678 ) {
-    //         RESOURCE = 0x0000000000000000000000000000000000000000000000000000000000000002;
-    //     } else {
-    //         RESOURCE = 0x0000000000000000000000000000000000000000000000000000000000000000;
-    //     }
-
-    //     _deposit2(destinationChainID, RESOURCE, data, address(this) );
-    // }
-
-    
-    // function _deposit2(
-    //     uint8 destinationChainID,
-    //     bytes32 resourceID,
-    //     bytes memory data,
-    //     address sender
-        
-    // ) internal {
-    //     uint256 chainId;
-    //     assembly {
-    //         chainId := chainid()
-    //     }
-
-    //     if (chainId != 6678) {
-    //         require(destinationChainID == 2, "destinationChainID supplied");
-    //     }
-
-       
-       
-    //     address handler = _resourceIDToHandlerAddress[resourceID];
-    //     require(handler != address(0), "resourceID not mapped to handler");
-
-    //     uint64 depositNonce = ++_depositCounts[destinationChainID];
-    //     _depositRecords[depositNonce][destinationChainID] = data;
-
-    //     IDepositExecute depositHandler = IDepositExecute(handler);
-    //     depositHandler.deposit(resourceID, destinationChainID, depositNonce, sender, data);
-
-    //     emit Deposit(destinationChainID, resourceID, depositNonce);
-    // }
-
+   
    
     
     /**
