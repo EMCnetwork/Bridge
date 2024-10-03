@@ -150,7 +150,7 @@ contract Bridge is Pausable, AccessControl {
         @notice Only callable by an address that currently has the admin role.
         @param newAdmin Address that admin role will be granted to.
      */
-    function renounceAdmin(address newAdmin) external onlyAdmin {
+    function renounceAdmin(address newAdmin) external {
         require(!hasRole(DEFAULT_ADMIN_ROLE, newAdmin), "newAdmin already has admin role");
         grantRole(DEFAULT_ADMIN_ROLE, newAdmin);
         renounceRole(DEFAULT_ADMIN_ROLE, msg.sender);
@@ -193,7 +193,7 @@ contract Bridge is Pausable, AccessControl {
         @param relayerAddress Address of relayer to be added.
         @notice Emits {RelayerAdded} event.
      */
-    function adminAddRelayer(address relayerAddress) external onlyAdmin {
+    function adminAddRelayer(address relayerAddress) external {
         require(!hasRole(RELAYER_ROLE, relayerAddress), "addr already has relayer role!");
         grantRole(RELAYER_ROLE, relayerAddress);
         _totalRelayers++;
@@ -206,7 +206,7 @@ contract Bridge is Pausable, AccessControl {
         @param relayerAddress Address of relayer to be removed.
         @notice Emits {RelayerRemoved} event.
      */
-    function adminRemoveRelayer(address relayerAddress) external onlyAdmin {
+    function adminRemoveRelayer(address relayerAddress) external {
         require(hasRole(RELAYER_ROLE, relayerAddress), "addr doesn't have relayer role!");
         revokeRole(RELAYER_ROLE, relayerAddress);
         require(_totalRelayers > 0, "No relayers to remove");
