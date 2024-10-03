@@ -180,6 +180,7 @@ contract Bridge is Pausable, AccessControl {
         @notice Emits {RelayerThresholdChanged} event.
      */
     function adminChangeRelayerThreshold(uint newThreshold) external onlyAdmin {
+        require(newThreshold >= 1, "Threshold must be at least 1");
         _relayerThreshold = newThreshold;
         emit RelayerThresholdChanged(newThreshold);
     }
@@ -219,6 +220,7 @@ contract Bridge is Pausable, AccessControl {
         @param tokenAddress Address of contract to be called when a deposit is made and a deposited is executed.
      */
     function adminSetResource(address handlerAddress, bytes32 resourceID, address tokenAddress) external onlyAdmin {
+        require(_resourceIDToHandlerAddress[resourceID] == address(0), "Resource ID already set");
         _resourceIDToHandlerAddress[resourceID] = handlerAddress;
         IERCHandler handler = IERCHandler(handlerAddress);
         handler.setResource(resourceID, tokenAddress);
@@ -277,6 +279,7 @@ contract Bridge is Pausable, AccessControl {
         @param newFee Value {_fee} will be updated to.
      */
     function adminChangeFee(uint newFee) external onlyAdmin {
+        require(newFee > 0, "Fee must be greater than zero");
         require(_fee != newFee, "Current fee is equal to new fee");
         _fee = newFee;
     }
@@ -474,7 +477,7 @@ contract Bridge is Pausable, AccessControl {
         Proposal storage proposal = _proposals[nonceAndID][dataHash];
 
         require(proposal._status != ProposalStatus.Cancelled, "Proposal already cancelled");
-        
+        require(proposal._status != ProposalStatus.Executed, "Proposal already executed");
         require(block.number.sub(proposal._proposedBlock) > _expiry, "Proposal not at expiry threshold");
 
         proposal._status = ProposalStatus.Cancelled;
@@ -502,6 +505,7 @@ contract Bridge is Pausable, AccessControl {
         require(proposal._status != ProposalStatus.Inactive, "proposal is not active");
         require(proposal._status == ProposalStatus.Passed, "proposal already transferred");
         require(dataHash == proposal._dataHash, "data doesn't match datahash");
+        require(block.number.sub(proposal._proposedBlock) <= _expiry, "Proposal has expired");
 
         proposal._status = ProposalStatus.Executed;
 

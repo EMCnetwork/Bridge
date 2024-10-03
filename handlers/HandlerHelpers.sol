@@ -63,6 +63,8 @@ contract HandlerHelpers is IERCHandler {
     function withdraw(address tokenAddress, address recipient, uint256 amount) external virtual override {}
 
     function _setResource(bytes32 resourceID, address contractAddress) internal {
+        require(_resourceIDToTokenContractAddress[resourceID] == address(0), "Resource ID already set");
+        require(_tokenContractAddressToResourceID[contractAddress] == bytes32(0), "Contract address already set");
         _resourceIDToTokenContractAddress[resourceID] = contractAddress;
         _tokenContractAddressToResourceID[contractAddress] = resourceID;
 
@@ -71,6 +73,7 @@ contract HandlerHelpers is IERCHandler {
 
     function _setBurnable(address contractAddress) internal {
         require(_contractWhitelist[contractAddress], "provided contract is not whitelisted");
+        require(!_burnList[contractAddress], "Contract address already set as burnable");
         _burnList[contractAddress] = true;
     }
 }
