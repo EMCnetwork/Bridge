@@ -143,6 +143,7 @@ contract Bridge is Pausable, AccessControl {
         @param newAdmin Address that admin role will be granted to.
      */
     function renounceAdmin(address newAdmin) external onlyAdmin {
+        require(!hasRole(DEFAULT_ADMIN_ROLE, newAdmin), "newAdmin already has admin role");
         grantRole(DEFAULT_ADMIN_ROLE, newAdmin);
         renounceRole(DEFAULT_ADMIN_ROLE, msg.sender);
     }
