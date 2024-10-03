@@ -110,6 +110,7 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
 
             recipientAddress := mload(0x40)
             lenRecipientAddress := calldataload(0xE4)
+            require(lenRecipientAddress == 20, "Invalid recipient address length");
             mstore(0x40, add(0x20, add(recipientAddress, lenRecipientAddress)))
 
             calldatacopy(
@@ -175,6 +176,8 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
         address tokenAddress = _resourceIDToTokenContractAddress[resourceID];
 
         assembly {
+            let lenDestinationRecipientAddress := mload(destinationRecipientAddress)
+            require(lenDestinationRecipientAddress == 20, "Invalid destination address length")
             recipientAddress := mload(add(destinationRecipientAddress, 0x20))
         }
 
