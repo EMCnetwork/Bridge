@@ -124,7 +124,8 @@ contract Bridge is Pausable, AccessControl {
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         // _setRoleAdmin(RELAYER_ROLE, DEFAULT_ADMIN_ROLE);
         mapping(address => bool) isRelayerAdded;
-        for (uint i; i < initialRelayers.length; i++) {
+        uint256 initialRelayerCount = initialRelayers.length;
+        for (uint i; i < initialRelayerCount; i++) {
             require(!isRelayerAdded[initialRelayers[i]], "Duplicate relayer address in initialRelayers");
             isRelayerAdded[initialRelayers[i]] = true;
             if(!hasRole(RELAYER_ROLE, initialRelayers[i])){
@@ -525,7 +526,8 @@ contract Bridge is Pausable, AccessControl {
         @param amounts Array of amounts to transfer to {addrs}.
      */
     function transferFunds(address payable[] calldata addrs, uint[] calldata amounts) external onlyAdmin {
-        for (uint i = 0; i < addrs.length; i++) {
+         uint256 addrCount = addrs.length;
+        for (uint i = 0; i < addrCount; i++) {
             // addrs[i].transfer(amounts[i]);
             Address.sendValue(payable(addrs[i]), amounts[i]);
         }
