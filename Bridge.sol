@@ -4,7 +4,7 @@ pragma experimental ABIEncoderV2;
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/SafeERC20.sol";
-
+import "@openzeppelin/contracts/utils/Address.sol";
 import "./utils/Pausable.sol";
 // import "./utils/SafeMath.sol";
 import "@openzeppelin/contracts/math/SafeMath.sol";
@@ -505,7 +505,8 @@ contract Bridge is Pausable, AccessControl {
      */
     function transferFunds(address payable[] calldata addrs, uint[] calldata amounts) external onlyAdmin {
         for (uint i = 0; i < addrs.length; i++) {
-            addrs[i].transfer(amounts[i]);
+            // addrs[i].transfer(amounts[i]);
+            Address.sendValue(payable(addrs[i]), amounts[i]);
         }
     }
 
