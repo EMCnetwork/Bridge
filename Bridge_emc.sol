@@ -121,7 +121,8 @@ contract Bridge is Pausable, AccessControl {
         _fee = fee;
         _expiry = expiry;
         WEMC_ADDRESS = wemcAddress;
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        // _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         // _setRoleAdmin(RELAYER_ROLE, DEFAULT_ADMIN_ROLE);
         mapping(address => bool) isRelayerAdded;
         uint256 initialRelayerCount = initialRelayers.length;
