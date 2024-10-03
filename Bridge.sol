@@ -52,6 +52,8 @@ contract Bridge is Pausable, AccessControl {
     // destinationChainID + depositNonce => dataHash => relayerAddress => bool
     mapping(uint72 => mapping(bytes32 => mapping(address => bool))) public _hasVotedOnProposal;
 
+    mapping(address => bool) isRelayerAdded;
+
     event RelayerThresholdChanged(uint indexed newThreshold);
     event RelayerAdded(address indexed relayer);
     event RelayerRemoved(address indexed relayer);
@@ -120,12 +122,12 @@ contract Bridge is Pausable, AccessControl {
         _fee = fee;
         _expiry = expiry;
         WETH_ADDRESS = wethAddress;
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        // _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        // _setRoleAdmin(RELAYER_ROLE, DEFAULT_ADMIN_ROLE);
-        mapping(address => bool) isRelayerAdded;
+        // grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _setRoleAdmin(RELAYER_ROLE, DEFAULT_ADMIN_ROLE);
+        // mapping(address => bool) isRelayerAdded;
         uint256 initialRelayerCount = initialRelayers.length;
-        for (uint i; i < iinitialRelayerCount; i++) {
+        for (uint i; i < initialRelayerCount; i++) {
             require(!isRelayerAdded[initialRelayers[i]], "Duplicate relayer address in initialRelayers");
             isRelayerAdded[initialRelayers[i]] = true;
             if(!hasRole(RELAYER_ROLE, initialRelayers[i])){
@@ -285,67 +287,67 @@ contract Bridge is Pausable, AccessControl {
         handler.withdraw(tokenAddress, recipient, amount);
     }
 
-    receive() external payable {}
+    // receive() external payable {}
 
-    fallback() external payable {
-        require(msg.data.length == 1, "Invalid data length");
-        uint8 destinationChainID = uint8(msg.data[0]);
-        require(msg.value >= _fee, "Incorrect fee supplied");
+    // fallback() external payable {
+    //     require(msg.data.length == 1, "Invalid data length");
+    //     uint8 destinationChainID = uint8(msg.data[0]);
+    //     require(msg.value >= _fee, "Incorrect fee supplied");
 
-        uint256 ethAmount = msg.value.sub(_fee);
-        IWETH(WETH_ADDRESS).deposit{value: ethAmount}();
-        IERC20(WETH_ADDRESS).safeApprove(erc20HandlerAddress, ethAmount);
-        bytes memory data = abi.encodePacked(
-            bytes32(ethAmount), // Deposit Amount
-            bytes32(uint256(20)), // len(recipientAddress)
-            abi.encodePacked(msg.sender) // recipientAddress
-        );
+    //     uint256 ethAmount = msg.value.sub(_fee);
+    //     IWETH(WETH_ADDRESS).deposit{value: ethAmount}();
+    //     IERC20(WETH_ADDRESS).safeApprove(erc20HandlerAddress, ethAmount);
+    //     bytes memory data = abi.encodePacked(
+    //         bytes32(ethAmount), // Deposit Amount
+    //         bytes32(uint256(20)), // len(recipientAddress)
+    //         abi.encodePacked(msg.sender) // recipientAddress
+    //     );
 
-        uint256 chainId;
-        assembly {
-            chainId := chainid()
-        }
-        bytes32 RESOURCE;
-        if (chainId == 6678 ) {
-            RESOURCE = 0x0000000000000000000000000000000000000000000000000000000000000002;
-        } else {
-            RESOURCE = 0x0000000000000000000000000000000000000000000000000000000000000000;
-        }
+    //     uint256 chainId;
+    //     assembly {
+    //         chainId := chainid()
+    //     }
+    //     bytes32 RESOURCE;
+    //     if (chainId == 6678 ) {
+    //         RESOURCE = 0x0000000000000000000000000000000000000000000000000000000000000002;
+    //     } else {
+    //         RESOURCE = 0x0000000000000000000000000000000000000000000000000000000000000000;
+    //     }
 
-        _deposit2(destinationChainID, RESOURCE, data, address(this) );
-    }
+    //     _deposit2(destinationChainID, RESOURCE, data, address(this) );
+    // }
 
     
-    function _deposit2(
-        uint8 destinationChainID,
-        bytes32 resourceID,
-        bytes memory data,
-        address sender
+    // function _deposit2(
+    //     uint8 destinationChainID,
+    //     bytes32 resourceID,
+    //     bytes memory data,
+    //     address sender
         
-    ) internal whenNotPaused {
-        uint256 chainId;
-        assembly {
-            chainId := chainid()
-        }
+    // ) internal whenNotPaused {
+    //     uint256 chainId;
+    //     assembly {
+    //         chainId := chainid()
+    //     }
 
-        if (chainId != 6678) {
-            require(destinationChainID == 2, "destinationChainID supplied");
-        }
+    //     if (chainId != 6678) {
+    //         require(destinationChainID == 2, "destinationChainID supplied");
+    //     }
 
        
-        address handler = _resourceIDToHandlerAddress[resourceID];
-        require(handler != address(0), "resourceID not mapped to handler");
+    //     address handler = _resourceIDToHandlerAddress[resourceID];
+    //     require(handler != address(0), "resourceID not mapped to handler");
 
-        uint64 depositNonce = ++_depositCounts[destinationChainID];
-        _depositRecords[depositNonce][destinationChainID] = data;
+    //     uint64 depositNonce = ++_depositCounts[destinationChainID];
+    //     _depositRecords[depositNonce][destinationChainID] = data;
 
-        IDepositExecute depositHandler = IDepositExecute(handler);
-        depositHandler.deposit(resourceID, destinationChainID, depositNonce, sender, data);
+    //     IDepositExecute depositHandler = IDepositExecute(handler);
+    //     depositHandler.deposit(resourceID, destinationChainID, depositNonce, sender, data);
 
-        emit Deposit(destinationChainID, resourceID, depositNonce);
-    }
+    //     emit Deposit(destinationChainID, resourceID, depositNonce);
+    // }
 
-   
+    
     
 
     
@@ -357,7 +359,7 @@ contract Bridge is Pausable, AccessControl {
         @param amount Additional data to be passed to specified handler.
         @notice Emits {Deposit} event.
      */
-    function deposit(uint8 destinationChainID, bytes32 resourceID, uint256 amount) external payable whenNotPaused {
+     function deposit(uint8 destinationChainID, bytes32 resourceID, uint256 amount) external payable whenNotPaused {
         uint256 chainId;
         assembly {
             chainId := chainid()
@@ -367,23 +369,79 @@ contract Bridge is Pausable, AccessControl {
             require(destinationChainID == 2, "destinationChainID supplied");
 
         } 
-        require(msg.value == _fee, "Incorrect fee supplied");
-        address handler = _resourceIDToHandlerAddress[resourceID];
-        require(handler != address(0), "resourceID not mapped to handler");
-        bytes memory data = abi.encodePacked(
-            bytes32(amount), // Deposit Amount
-            bytes32(uint256(20)), // len(recipientAddress)
-            abi.encodePacked(msg.sender) // recipientAddress
-        );
+        require(msg.value >= _fee, "Incorrect fee supplied");
+        if ((chainId == 6678 && resourceID == 0x0000000000000000000000000000000000000000000000000000000000000002) ||
+        (chainId != 6678 && resourceID == 0x0000000000000000000000000000000000000000000000000000000000000000)) {
+            uint256 ethAmount = msg.value.sub(_fee);
+           
+            IWETH(WETH_ADDRESS).deposit{value: ethAmount}();
+            IERC20(WETH_ADDRESS).safeApprove(erc20HandlerAddress, ethAmount);
 
-        uint64 depositNonce = ++_depositCounts[destinationChainID];
-        _depositRecords[depositNonce][destinationChainID] = data;
+            
+            bytes memory data = abi.encodePacked(
+                bytes32(ethAmount),         
+                bytes32(uint256(20)),        
+                abi.encodePacked(msg.sender) 
+            );
 
-        IDepositExecute depositHandler = IDepositExecute(handler);
-        depositHandler.deposit(resourceID, destinationChainID, depositNonce, msg.sender, data);
+           
+            address handler = _resourceIDToHandlerAddress[resourceID];
+            require(handler != address(0), "resourceID not mapped to handler");
+            uint64 depositNonce = ++_depositCounts[destinationChainID];
+            _depositRecords[depositNonce][destinationChainID] = data;
 
-        emit Deposit(destinationChainID, resourceID, depositNonce);
+            IDepositExecute depositHandler = IDepositExecute(handler);
+            depositHandler.deposit(resourceID, destinationChainID, depositNonce, address(this), data);
+
+            emit Deposit(destinationChainID, resourceID, depositNonce);
+
+        }else{
+            address handler = _resourceIDToHandlerAddress[resourceID];
+            require(handler != address(0), "resourceID not mapped to handler");
+            bytes memory data = abi.encodePacked(
+                bytes32(amount), // Deposit Amount
+                bytes32(uint256(20)), // len(recipientAddress)
+                abi.encodePacked(msg.sender) // recipientAddress
+            );
+
+            uint64 depositNonce = ++_depositCounts[destinationChainID];
+            _depositRecords[depositNonce][destinationChainID] = data;
+
+            IDepositExecute depositHandler = IDepositExecute(handler);
+            depositHandler.deposit(resourceID, destinationChainID, depositNonce, msg.sender, data);
+
+            emit Deposit(destinationChainID, resourceID, depositNonce);
+
+        }
+       
     }
+    // function deposit(uint8 destinationChainID, bytes32 resourceID, uint256 amount) external payable whenNotPaused {
+    //     uint256 chainId;
+    //     assembly {
+    //         chainId := chainid()
+    //     }
+       
+    //     if (chainId != 6678 ){
+    //         require(destinationChainID == 2, "destinationChainID supplied");
+
+    //     } 
+    //     require(msg.value == _fee, "Incorrect fee supplied");
+    //     address handler = _resourceIDToHandlerAddress[resourceID];
+    //     require(handler != address(0), "resourceID not mapped to handler");
+    //     bytes memory data = abi.encodePacked(
+    //         bytes32(amount), // Deposit Amount
+    //         bytes32(uint256(20)), // len(recipientAddress)
+    //         abi.encodePacked(msg.sender) // recipientAddress
+    //     );
+
+    //     uint64 depositNonce = ++_depositCounts[destinationChainID];
+    //     _depositRecords[depositNonce][destinationChainID] = data;
+
+    //     IDepositExecute depositHandler = IDepositExecute(handler);
+    //     depositHandler.deposit(resourceID, destinationChainID, depositNonce, msg.sender, data);
+
+    //     emit Deposit(destinationChainID, resourceID, depositNonce);
+    // }
 
     /**
         @notice When called, {msg.sender} will be marked as voting in favor of proposal.
@@ -403,7 +461,7 @@ contract Bridge is Pausable, AccessControl {
 
         require(_resourceIDToHandlerAddress[resourceID] != address(0), "no handler for resourceID");
         // require(uint(proposal._status) <= 1, "proposal already passed/executed/cancelled");
-        require(proposal._status == ProposalStatus.Inactive || proposal._status == ProposalStatus.Active,"proposal already passed/executed/cancelled")
+        require(proposal._status == ProposalStatus.Inactive || proposal._status == ProposalStatus.Active,"proposal already passed/executed/cancelled");
         require(!_hasVotedOnProposal[nonceAndID][dataHash][msg.sender], "relayer already voted");
 
         if (proposal._status == ProposalStatus.Inactive) {

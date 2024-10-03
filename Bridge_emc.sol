@@ -11,7 +11,7 @@ import "@openzeppelin/contracts/math/SafeMath.sol";
 import "./interfaces/IDepositExecute.sol";
 import "./interfaces/IBridge.sol";
 import "./interfaces/IERCHandler.sol";
-import "./interfaces/IGenericHandler.sol";
+// import "./interfaces/IGenericHandler.sol";
 import "./interfaces/IWEMC.sol"; 
 /**
     @title Facilitates deposits, creation and votiing of deposit proposals, and deposit executions.
@@ -52,6 +52,8 @@ contract Bridge is Pausable, AccessControl {
     mapping(uint72 => mapping(bytes32 => Proposal)) public _proposals;
     // destinationChainID + depositNonce => dataHash => relayerAddress => bool
     mapping(uint72 => mapping(bytes32 => mapping(address => bool))) public _hasVotedOnProposal;
+    
+    mapping(address => bool) isRelayerAdded;
 
     event RelayerThresholdChanged(uint indexed newThreshold);
     event RelayerAdded(address indexed relayer);
@@ -121,10 +123,9 @@ contract Bridge is Pausable, AccessControl {
         _fee = fee;
         _expiry = expiry;
         WEMC_ADDRESS = wemcAddress;
-        _grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        // _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
-        // _setRoleAdmin(RELAYER_ROLE, DEFAULT_ADMIN_ROLE);
-        mapping(address => bool) isRelayerAdded;
+        // grantRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
+        _setRoleAdmin(RELAYER_ROLE, DEFAULT_ADMIN_ROLE);
         uint256 initialRelayerCount = initialRelayers.length;
         for (uint i; i < initialRelayerCount; i++) {
             require(!isRelayerAdded[initialRelayers[i]], "Duplicate relayer address in initialRelayers");
@@ -233,26 +234,6 @@ contract Bridge is Pausable, AccessControl {
     }
 
     /**
-        @notice Sets a new resource for handler contracts that use the IGenericHandler interface,
-        and maps the {handlerAddress} to {resourceID} in {_resourceIDToHandlerAddress}.
-        @notice Only callable by an address that currently has the admin role.
-        @param handlerAddress Address of handler resource will be set for.
-        @param resourceID ResourceID to be used when making deposits.
-        @param contractAddress Address of contract to be called when a deposit is made and a deposited is executed.
-     */
-    function adminSetGenericResource(
-        address handlerAddress,
-        bytes32 resourceID,
-        address contractAddress,
-        bytes4 depositFunctionSig,
-        bytes4 executeFunctionSig
-    ) external onlyAdmin {
-        _resourceIDToHandlerAddress[resourceID] = handlerAddress;
-        IGenericHandler handler = IGenericHandler(handlerAddress);
-        handler.setResource(resourceID, contractAddress, depositFunctionSig, executeFunctionSig);
-    }
-
-    /**
         @notice Sets a resource as burnable for handler contracts that use the IERCHandler interface.
         @notice Only callable by an address that currently has the admin role.
         @param handlerAddress Address of handler resource will be set for.
@@ -306,69 +287,68 @@ contract Bridge is Pausable, AccessControl {
         handler.withdraw(tokenAddress, recipient, amount);
     }
 
-    receive() external payable {}
+    // receive() external payable {}
 
-    fallback() external payable {
-        require(msg.data.length == 1, "Invalid data length");
-        uint8 destinationChainID = uint8(msg.data[0]);
-        require(msg.value >= _fee, "Incorrect fee supplied");
+    // fallback() external payable {
+    //     require(msg.data.length == 1, "Invalid data length");
+    //     uint8 destinationChainID = uint8(msg.data[0]);
+    //     require(msg.value >= _fee, "Incorrect fee supplied");
 
-        uint256 emcAmount = msg.value.sub(_fee);
-        IWEMC(WEMC_ADDRESS).deposit{value: emcAmount}();
-        IERC20(WEMC_ADDRESS).safeApprove(erc20HandlerAddress, emcAmount);
-        bytes memory data = abi.encodePacked(
-            bytes32(emcAmount), // Deposit Amount
-            bytes32(uint256(20)), // len(recipientAddress)
-            abi.encodePacked(msg.sender) // recipientAddress
-        );
+    //     uint256 emcAmount = msg.value.sub(_fee);
+    //     IWEMC(WEMC_ADDRESS).deposit{value: emcAmount}();
+    //     IERC20(WEMC_ADDRESS).safeApprove(erc20HandlerAddress, emcAmount);
+    //     bytes memory data = abi.encodePacked(
+    //         bytes32(emcAmount), // Deposit Amount
+    //         bytes32(uint256(20)), // len(recipientAddress)
+    //         abi.encodePacked(msg.sender) // recipientAddress
+    //     );
 
-        uint256 chainId;
-        assembly {
-            chainId := chainid()
-        }
-        bytes32 RESOURCE;
-        if (chainId == 6678 ) {
-            RESOURCE = 0x0000000000000000000000000000000000000000000000000000000000000002;
-        } else {
-            RESOURCE = 0x0000000000000000000000000000000000000000000000000000000000000000;
-        }
+    //     uint256 chainId;
+    //     assembly {
+    //         chainId := chainid()
+    //     }
+    //     bytes32 RESOURCE;
+    //     if (chainId == 6678 ) {
+    //         RESOURCE = 0x0000000000000000000000000000000000000000000000000000000000000002;
+    //     } else {
+    //         RESOURCE = 0x0000000000000000000000000000000000000000000000000000000000000000;
+    //     }
 
-        _deposit2(destinationChainID, RESOURCE, data, address(this) );
-    }
+    //     _deposit2(destinationChainID, RESOURCE, data, address(this) );
+    // }
 
     
-    function _deposit2(
-        uint8 destinationChainID,
-        bytes32 resourceID,
-        bytes memory data,
-        address sender
+    // function _deposit2(
+    //     uint8 destinationChainID,
+    //     bytes32 resourceID,
+    //     bytes memory data,
+    //     address sender
         
-    ) internal {
-        uint256 chainId;
-        assembly {
-            chainId := chainid()
-        }
+    // ) internal {
+    //     uint256 chainId;
+    //     assembly {
+    //         chainId := chainid()
+    //     }
 
-        if (chainId != 6678) {
-            require(destinationChainID == 2, "destinationChainID supplied");
-        }
+    //     if (chainId != 6678) {
+    //         require(destinationChainID == 2, "destinationChainID supplied");
+    //     }
 
        
-        address handler = _resourceIDToHandlerAddress[resourceID];
-        require(handler != address(0), "resourceID not mapped to handler");
+       
+    //     address handler = _resourceIDToHandlerAddress[resourceID];
+    //     require(handler != address(0), "resourceID not mapped to handler");
 
-        uint64 depositNonce = ++_depositCounts[destinationChainID];
-        _depositRecords[depositNonce][destinationChainID] = data;
+    //     uint64 depositNonce = ++_depositCounts[destinationChainID];
+    //     _depositRecords[depositNonce][destinationChainID] = data;
 
-        IDepositExecute depositHandler = IDepositExecute(handler);
-        depositHandler.deposit(resourceID, destinationChainID, depositNonce, sender, data);
+    //     IDepositExecute depositHandler = IDepositExecute(handler);
+    //     depositHandler.deposit(resourceID, destinationChainID, depositNonce, sender, data);
 
-        emit Deposit(destinationChainID, resourceID, depositNonce);
-    }
+    //     emit Deposit(destinationChainID, resourceID, depositNonce);
+    // }
 
    
-    
-
     
     /**
         @notice Initiates a transfer using a specified handler contract.
@@ -388,22 +368,51 @@ contract Bridge is Pausable, AccessControl {
             require(destinationChainID == 2, "destinationChainID supplied");
 
         } 
-        require(msg.value == _fee, "Incorrect fee supplied");
-        address handler = _resourceIDToHandlerAddress[resourceID];
-        require(handler != address(0), "resourceID not mapped to handler");
-        bytes memory data = abi.encodePacked(
-            bytes32(amount), // Deposit Amount
-            bytes32(uint256(20)), // len(recipientAddress)
-            abi.encodePacked(msg.sender) // recipientAddress
-        );
+        require(msg.value >= _fee, "Incorrect fee supplied");
+        if ((chainId == 6678 && resourceID == 0x0000000000000000000000000000000000000000000000000000000000000002) ||
+        (chainId != 6678 && resourceID == 0x0000000000000000000000000000000000000000000000000000000000000000)) {
+            uint256 emcAmount = msg.value.sub(_fee);
+           
+            IWEMC(WEMC_ADDRESS).deposit{value: emcAmount}();
+            IERC20(WEMC_ADDRESS).safeApprove(erc20HandlerAddress, emcAmount);
 
-        uint64 depositNonce = ++_depositCounts[destinationChainID];
-        _depositRecords[depositNonce][destinationChainID] = data;
+            
+            bytes memory data = abi.encodePacked(
+                bytes32(emcAmount),         
+                bytes32(uint256(20)),        
+                abi.encodePacked(msg.sender) 
+            );
 
-        IDepositExecute depositHandler = IDepositExecute(handler);
-        depositHandler.deposit(resourceID, destinationChainID, depositNonce, msg.sender, data);
+           
+            address handler = _resourceIDToHandlerAddress[resourceID];
+            require(handler != address(0), "resourceID not mapped to handler");
+            uint64 depositNonce = ++_depositCounts[destinationChainID];
+            _depositRecords[depositNonce][destinationChainID] = data;
 
-        emit Deposit(destinationChainID, resourceID, depositNonce);
+            IDepositExecute depositHandler = IDepositExecute(handler);
+            depositHandler.deposit(resourceID, destinationChainID, depositNonce, address(this), data);
+
+            emit Deposit(destinationChainID, resourceID, depositNonce);
+
+        }else{
+            address handler = _resourceIDToHandlerAddress[resourceID];
+            require(handler != address(0), "resourceID not mapped to handler");
+            bytes memory data = abi.encodePacked(
+                bytes32(amount), // Deposit Amount
+                bytes32(uint256(20)), // len(recipientAddress)
+                abi.encodePacked(msg.sender) // recipientAddress
+            );
+
+            uint64 depositNonce = ++_depositCounts[destinationChainID];
+            _depositRecords[depositNonce][destinationChainID] = data;
+
+            IDepositExecute depositHandler = IDepositExecute(handler);
+            depositHandler.deposit(resourceID, destinationChainID, depositNonce, msg.sender, data);
+
+            emit Deposit(destinationChainID, resourceID, depositNonce);
+
+        }
+       
     }
 
     /**
