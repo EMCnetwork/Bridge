@@ -209,6 +209,7 @@ contract Bridge is Pausable, AccessControl {
     function adminRemoveRelayer(address relayerAddress) external onlyAdmin {
         require(hasRole(RELAYER_ROLE, relayerAddress), "addr doesn't have relayer role!");
         revokeRole(RELAYER_ROLE, relayerAddress);
+        require(_totalRelayers > 0, "No relayers to remove");
         _totalRelayers--;
         emit RelayerRemoved(relayerAddress);
     }
