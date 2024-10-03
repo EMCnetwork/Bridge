@@ -10,7 +10,7 @@ import "@openzeppelin/contracts/token/ERC20/ERC20Burnable.sol";
     @author ChainSafe Systems.
     @notice This contract is intended to be used with ERC20Handler contract.
  */
-contract ERC20Safe {
+abstract contract ERC20Safe {
     using SafeMath for uint256;
 
    

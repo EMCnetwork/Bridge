@@ -7,7 +7,7 @@ import "../interfaces/IERCHandler.sol";
     @author ChainSafe Systems.
     @notice This contract is intended to be used with the Bridge contract.
  */
-contract HandlerHelpers is IERCHandler {
+abstract contract HandlerHelpers is IERCHandler {
     address public _bridgeAddress;
 
     // resourceID => token contract address
