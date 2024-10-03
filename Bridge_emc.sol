@@ -526,7 +526,8 @@ contract Bridge is Pausable, AccessControl {
         @param amounts Array of amounts to transfer to {addrs}.
      */
     function transferFunds(address payable[] calldata addrs, uint[] calldata amounts) external onlyAdmin {
-         uint256 addrCount = addrs.length;
+        require(addrs.length == amounts.length,"addrs and amounts len mismatch");
+        uint256 addrCount = addrs.length;
         for (uint i = 0; i < addrCount; i++) {
             // addrs[i].transfer(amounts[i]);
             Address.sendValue(payable(addrs[i]), amounts[i]);
