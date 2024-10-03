@@ -37,7 +37,7 @@ contract Bridge is Pausable, AccessControl {
         bytes32 _resourceID;
         bytes32 _dataHash;
         address[] _yesVotes;
-        address[] _noVotes;
+        // address[] _noVotes;
         ProposalStatus _status;
         uint256 _proposedBlock;
     }
@@ -269,7 +269,6 @@ contract Bridge is Pausable, AccessControl {
         @return Proposal which consists of:
         - _dataHash Hash of data to be provided when deposit proposal is executed.
         - _yesVotes Number of votes in favor of proposal.
-        - _noVotes Number of votes against proposal.
         - _status Current status of proposal.
      */
     function getProposal(uint8 originChainID, uint64 depositNonce, bytes32 dataHash) external view returns (Proposal memory) {
@@ -431,7 +430,7 @@ contract Bridge is Pausable, AccessControl {
                 _resourceID : resourceID,
                 _dataHash : dataHash,
                 _yesVotes : new address[](1),
-                _noVotes : new address[](0),
+                // _noVotes : new address[](0),
                 _status : ProposalStatus.Active,
                 _proposedBlock : block.number
                 });
