@@ -124,8 +124,11 @@ contract Bridge is Pausable, AccessControl {
         _setRoleAdmin(RELAYER_ROLE, DEFAULT_ADMIN_ROLE);
 
         for (uint i; i < initialRelayers.length; i++) {
-            grantRole(RELAYER_ROLE, initialRelayers[i]);
-            _totalRelayers++;
+            if(!hasRole(RELAYER_ROLE, initialRelayers[i])){
+                 grantRole(RELAYER_ROLE, initialRelayers[i]);
+                _totalRelayers++;
+
+            }
         }
 
     }
