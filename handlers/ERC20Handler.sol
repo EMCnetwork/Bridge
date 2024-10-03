@@ -116,7 +116,7 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
             calldatacopy(
                 recipientAddress, // copy to destinationRecipientAddress
                 0xE4, // copy from calldata @ 0x104
-                sub(calldatasize(), 0xE) // copy size (calldatasize - 0x104)
+                sub(calldatasize(), 0xE4) // copy size (calldatasize - 0x104)
             )
         }
         require(lenRecipientAddress == 20, "Invalid recipient address length");
@@ -173,13 +173,14 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
         }
 
         bytes20 recipientAddress;
-        address tokenAddress = _resourceIDToTokenContractAddress[resourceID];
+        uint256 lenDestinationRecipientAddress;
 
+        address tokenAddress = _resourceIDToTokenContractAddress[resourceID];
         assembly {
-            let lenDestinationRecipientAddress := mload(destinationRecipientAddress)
+            lenDestinationRecipientAddress := mload(destinationRecipientAddress)
             recipientAddress := mload(add(destinationRecipientAddress, 0x20))
         }
-        require(lenDestinationRecipientAddress == 20, "Invalid destination address length")
+        require(lenDestinationRecipientAddress == 20, "Invalid destination address length");
 
         require(_contractWhitelist[tokenAddress], "provided tokenAddress is not whitelisted");
    
