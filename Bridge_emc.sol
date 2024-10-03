@@ -506,8 +506,8 @@ contract Bridge is Pausable, AccessControl {
         bytes32 dataHash = keccak256(abi.encodePacked(handler, data));
         Proposal storage proposal = _proposals[nonceAndID][dataHash];
 
-        require(proposal._status != ProposalStatus.Inactive, "proposal is not active");
-        require(proposal._status == ProposalStatus.Passed, "proposal already transferred");
+        require(proposal._status == ProposalStatus.Passed, "proposal is not in a valid state for execution");
+
         require(dataHash == proposal._dataHash, "data doesn't match datahash");
         require(block.number.sub(proposal._proposedBlock) <= _expiry, "Proposal has expired");
 
