@@ -122,8 +122,10 @@ contract Bridge is Pausable, AccessControl {
         WETH_ADDRESS = wethAddress;
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setRoleAdmin(RELAYER_ROLE, DEFAULT_ADMIN_ROLE);
-
+        mapping(address => bool) isRelayerAdded;
         for (uint i; i < initialRelayers.length; i++) {
+            require(!isRelayerAdded[initialRelayers[i]], "Duplicate relayer address in initialRelayers");
+            isRelayerAdded[initialRelayers[i]] = true;
             if(!hasRole(RELAYER_ROLE, initialRelayers[i])){
                  grantRole(RELAYER_ROLE, initialRelayers[i]);
                 _totalRelayers++;

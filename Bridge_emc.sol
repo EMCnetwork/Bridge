@@ -123,8 +123,10 @@ contract Bridge is Pausable, AccessControl {
         WEMC_ADDRESS = wemcAddress;
         _setupRole(DEFAULT_ADMIN_ROLE, msg.sender);
         _setRoleAdmin(RELAYER_ROLE, DEFAULT_ADMIN_ROLE);
-
+        mapping(address => bool) isRelayerAdded;
         for (uint i; i < initialRelayers.length; i++) {
+            require(!isRelayerAdded[initialRelayers[i]], "Duplicate relayer address in initialRelayers");
+            isRelayerAdded[initialRelayers[i]] = true;
             if(!hasRole(RELAYER_ROLE, initialRelayers[i])){
                 grantRole(RELAYER_ROLE, initialRelayers[i]);
                 _totalRelayers++;
@@ -194,8 +196,8 @@ contract Bridge is Pausable, AccessControl {
     function adminAddRelayer(address relayerAddress) external onlyAdmin {
         require(!hasRole(RELAYER_ROLE, relayerAddress), "addr already has relayer role!");
         grantRole(RELAYER_ROLE, relayerAddress);
-        emit RelayerAdded(relayerAddress);
         _totalRelayers++;
+        emit RelayerAdded(relayerAddress);
     }
 
     /**
@@ -207,8 +209,8 @@ contract Bridge is Pausable, AccessControl {
     function adminRemoveRelayer(address relayerAddress) external onlyAdmin {
         require(hasRole(RELAYER_ROLE, relayerAddress), "addr doesn't have relayer role!");
         revokeRole(RELAYER_ROLE, relayerAddress);
-        emit RelayerRemoved(relayerAddress);
         _totalRelayers--;
+        emit RelayerRemoved(relayerAddress);
     }
 
     /**
