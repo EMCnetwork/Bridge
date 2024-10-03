@@ -522,7 +522,7 @@ contract Bridge is Pausable, AccessControl {
         @notice Transfers emc in the contract to the specified addresses. The parameters addrs and amounts are mapped 1-1.
         This means that the address at index 0 for addrs will receive the amount (in WEI) from amounts at index 0.
         @param addrs Array of addresses to transfer {amounts} to.
-        @param amounts Array of amonuts to transfer to {addrs}.
+        @param amounts Array of amounts to transfer to {addrs}.
      */
     function transferFunds(address payable[] calldata addrs, uint[] calldata amounts) external onlyAdmin {
         for (uint i = 0; i < addrs.length; i++) {
