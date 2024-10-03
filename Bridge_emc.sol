@@ -115,6 +115,7 @@ contract Bridge is Pausable, AccessControl {
         @param initialRelayerThreshold Number of votes needed for a deposit proposal to be considered passed.
      */
     constructor (uint8 chainID, address[] memory initialRelayers, uint256 initialRelayerThreshold, uint256 fee, uint256 expiry,address wemcAddress) public {
+        require(wemcAddress != address(0), "Invalid address: zero address");
         _chainID = chainID;
         _relayerThreshold = initialRelayerThreshold;
         _fee = fee;
@@ -165,6 +166,7 @@ contract Bridge is Pausable, AccessControl {
         _unpause();
     }
     function setHandlerAddress(address _handlerAddress) external onlyAdmin {
+        require(_handlerAddress != address(0), "Invalid address: zero address");
         erc20HandlerAddress = _handlerAddress;
     }
     /**

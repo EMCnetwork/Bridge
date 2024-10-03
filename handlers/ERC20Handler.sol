@@ -48,7 +48,7 @@ contract ERC20Handler is IDepositExecute, HandlerHelpers, ERC20Safe {
     ) public {
         require(initialResourceIDs.length == initialContractAddresses.length,
             "initialResourceIDs and initialContractAddresses len mismatch");
-
+        require(bridgeAddress != address(0), "Invalid address: zero address");
         _bridgeAddress = bridgeAddress;
 
         for (uint256 i = 0; i < initialResourceIDs.length; i++) {
