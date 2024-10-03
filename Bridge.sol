@@ -210,7 +210,8 @@ contract Bridge is Pausable, AccessControl {
         require(hasRole(RELAYER_ROLE, relayerAddress), "addr doesn't have relayer role!");
         revokeRole(RELAYER_ROLE, relayerAddress);
         require(_totalRelayers > 0, "No relayers to remove");
-        _totalRelayers--;
+        // _totalRelayers--;
+        _totalRelayers = _totalRelayers.sub(1);
         emit RelayerRemoved(relayerAddress);
     }
 
