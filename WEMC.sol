@@ -1,5 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
+import "@openzeppelin/contracts/utils/Address.sol";
 
 contract WEMC {
     string public name;
@@ -31,7 +32,8 @@ contract WEMC {
         require(balanceOf[msg.sender] >= amount, "Insufficient balance");
         balanceOf[msg.sender] -= amount;
         totalSupply -= amount;
-        payable(msg.sender).transfer(amount);
+        // payable(msg.sender).transfer(amount);
+        Address.sendValue(payable(msg.sender), amount);
         emit Withdrawal(msg.sender, amount);
         emit Transfer(msg.sender, address(0), amount);
     }
