@@ -96,6 +96,32 @@ contract Bridge is Pausable, AccessControl {
         _;
     }
 
+    function grantRole(bytes32 role, address account) public override {
+        super.grantRole(role, account);
+        if (role == RELAYER_ROLE && !isRelayerAdded[account]) {
+            isRelayerAdded[account] = true;
+            _totalRelayers++;
+        }
+    }
+    function revokeRole(bytes32 role, address account) public override {
+        super.revokeRole(role, account);
+        if (role == RELAYER_ROLE && isRelayerAdded[account]) {
+            isRelayerAdded[account] = false;
+            if (_totalRelayers > 0) {
+                _totalRelayers--;
+            }
+        }
+    }
+    function renounceRole(bytes32 role, address account) public override {
+        super.renounceRole(role, account);
+        if (role == RELAYER_ROLE && isRelayerAdded[account]) {
+            isRelayerAdded[account] = false;
+            if (_totalRelayers > 0) {
+                _totalRelayers--;
+            }
+        }
+    }
+
     function _onlyAdminOrRelayer() private {
         require(hasRole(DEFAULT_ADMIN_ROLE, msg.sender) || hasRole(RELAYER_ROLE, msg.sender),
             "sender is not relayer or admin");
@@ -132,7 +158,6 @@ contract Bridge is Pausable, AccessControl {
             isRelayerAdded[initialRelayers[i]] = true;
             if(!hasRole(RELAYER_ROLE, initialRelayers[i])){
                 grantRole(RELAYER_ROLE, initialRelayers[i]);
-                _totalRelayers++;
 
              }
            
@@ -199,7 +224,6 @@ contract Bridge is Pausable, AccessControl {
     function adminAddRelayer(address relayerAddress) external  {
         require(!hasRole(RELAYER_ROLE, relayerAddress), "addr already has relayer role!");
         grantRole(RELAYER_ROLE, relayerAddress);
-        _totalRelayers++;
         emit RelayerAdded(relayerAddress);
     }
 
@@ -213,8 +237,6 @@ contract Bridge is Pausable, AccessControl {
         require(hasRole(RELAYER_ROLE, relayerAddress), "addr doesn't have relayer role!");
         revokeRole(RELAYER_ROLE, relayerAddress);
         require(_totalRelayers > 0, "No relayers to remove");
-        // _totalRelayers--;
-        _totalRelayers = _totalRelayers.sub(1);
         emit RelayerRemoved(relayerAddress);
     }
 
