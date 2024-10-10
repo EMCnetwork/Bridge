@@ -372,7 +372,7 @@ contract Bridge is Pausable, AccessControl {
         Proposal storage proposal = _proposals[nonceAndID][dataHash];
 
         require(_resourceIDToHandlerAddress[resourceID] != address(0), "no handler for resourceID");
-        require(uint(proposal._status) <= 1, "proposal already passed/executed/cancelled");
+        require(proposal._status == ProposalStatus.Inactive || proposal._status == ProposalStatus.Active,"proposal already passed/executed/cancelled");
         require(!_hasVotedOnProposal[nonceAndID][dataHash][msg.sender], "relayer already voted");
 
         if (uint(proposal._status) == 0) {
