@@ -16,7 +16,7 @@ abstract contract ERC20Safe {
    
 
     /**
-        @notice Used to gain custoday of deposited token.
+        @notice Used to gain custody of deposited token.
         @param tokenAddress Address of ERC20 to transfer.
         @param owner Address of current token owner.
         @param recipient Address to transfer tokens to.
@@ -28,7 +28,7 @@ abstract contract ERC20Safe {
     }
 
     /**
-        @notice Transfers custoday of token to recipient.
+        @notice Transfers custody of token to recipient.
         @param tokenAddress Address of ERC20 to transfer.
         @param recipient Address to transfer tokens to.
         @param amount Amount of tokens to transfer.
